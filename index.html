@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeriDoc — Next-Gen Digital Cloud Vault</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary-glow: #3b82f6;
+            --secondary-glow: #1d4ed8;
+            --neon-accent: #06b6d4;
+            --bg-dark: #0f172a;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            color: var(--text-main); 
+            background: #f1f5f9; 
+            word-wrap: break-word; 
+            overflow-wrap: break-word; 
+        }
+
+        /* Futuristic Header with Neon Glow */
+        header { 
+            background: linear-gradient(135deg, #0f172a, #1e40af); 
+            color: white; 
+            padding: 1.8rem 5%; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex-wrap: wrap; 
+            gap: 1rem; 
+            border-bottom: 3px solid var(--neon-accent);
+            box-shadow: 0 4px 30px rgba(6, 182, 212, 0.2);
+        }
+        .logo h1 { 
+            font-size: 2rem; 
+            font-weight: 700; 
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 15px rgba(6, 182, 212, 0.6);
+        }
+        .logo p { opacity: 0.85; font-size: 0.95rem; color: #93c5fd; }
+        
+        nav { display: flex; flex-wrap: wrap; gap: 1.2rem; }
+        nav a { 
+            color: #cbd5e1; 
+            text-decoration: none; 
+            font-weight: 500; 
+            font-size: 0.95rem; 
+            transition: all 0.3s ease; 
+        }
+        nav a:hover { 
+            color: var(--neon-accent); 
+            text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+        }
+
+        section { padding: 2.5rem 5%; max-width: 1100px; margin: 0 auto; }
+
+        /* Animated Hero Section */
+        .hero { 
+            text-align: center; 
+            padding: 4rem 5%; 
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            margin-top: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            animation: fadeIn 0.8s ease-out;
+        }
+        .hero h2 { font-size: 2.4rem; margin-bottom: 0.8rem; color: #1e3a8a; font-weight: 700; }
+        .hero p { font-size: 1.1rem; max-width: 700px; margin: 0 auto 2rem; color: #475569; }
+        .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+        /* Neon Buttons with Glow Animation */
+        .btn { 
+            padding: 0.85rem 1.8rem; 
+            border-radius: 10px; 
+            border: none; 
+            font-size: 0.95rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            text-decoration: none; 
+            display: inline-block; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .btn:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); 
+        }
+        .btn.primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; }
+        .btn.secondary { background: #e2e8f0; color: #1e293b; }
+        .btn.secondary:hover { background: #cbd5e1; box-shadow: 0 0 15px rgba(148, 163, 184, 0.5); }
+        .btn.backup { background: linear-gradient(135deg, #d97706, #b45309); color: white; }
+        .btn.backup:hover { box-shadow: 0 0 20px rgba(245, 158, 11, 0.6); }
+
+        /* Modern Floating Cards with Glow Hover */
+        .search-section, .upload-section, .all-docs, .about, .backup-section, .contact-section { 
+            background: var(--card-bg); 
+            margin: 1.8rem auto; 
+            padding: 2.5rem; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04); 
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            transition: all 0.4s ease; 
+        }
+        .search-section:hover, .upload-section:hover, .all-docs:hover, .backup-section:hover { 
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.12);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        h2 { color: #1e3a8a; margin-bottom: 1rem; font-size: 1.6rem; font-weight: 700; }
+        
+        .search-box { display: flex; gap: 0.8rem; margin: 1.5rem 0; flex-wrap: wrap; }
+        .search-box input { 
+            flex: 1; 
+            min-width: 220px; 
+            padding: 0.9rem 1.2rem; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 10px; 
+            font-size: 1rem; 
+            transition: all 0.3s; 
+        }
+        .search-box input:focus { outline: none; border-color: var(--primary-glow); box-shadow: 0 0 12px rgba(59, 130, 246, 0.25); }
+        .search-box button { padding: 0.9rem 1.8rem; background: #2563eb; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .search-box button:hover { background: #1d4ed8; box-shadow: 0 0 15px rgba(37, 99, 235, 0.4); }
+
+        .hint { color: #64748b; font-style: italic; padding: 0.5rem 0; }
+        .result-item, .doc-card { 
+            border: 1px solid #e2e8f0; 
+            border-radius: 12px; 
+            padding: 1.5rem; 
+            margin-bottom: 1.2rem; 
+            background: #f8fafc; 
+            transition: transform 0.2s, box-shadow 0.2s; 
+        }
+        .doc-card:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.05); }
+
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #334155; font-size: 0.95rem; }
+        .form-group input, .form-group textarea { 
+            width: 100%; 
+            padding: 0.85rem; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 8px; 
+            font-size: 0.95rem; 
+            font-family: inherit; 
+            transition: all 0.3s; 
+        }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-glow); box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); }
+        
+        input[type="file"] { 
+            padding: 0.8rem; 
+            border: 2px dashed #93c5fd; 
+            border-radius: 8px; 
+            background: #eff6ff; 
+            cursor: pointer; 
+            display: block; 
+            width: 100%; 
+            transition: background 0.3s; 
+        }
+        input[type="file"]:hover { background: #dbeafe; }
+
+        .message { margin-top: 1rem; padding: 0.9rem 1.2rem; border-radius: 8px; font-weight: 500; font-size: 0.95rem; animation: fadeIn 0.4s ease; }
+        .success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .error { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+        
+        .download-btn { display: inline-block; margin-top: 0.8rem; padding: 0.6rem 1.4rem; background: #16a34a; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; font-size: 0.9rem; margin-right: 0.6rem; transition: all 0.2s; }
+        .download-btn:hover { background: #15803d; box-shadow: 0 0 12px rgba(22, 163, 74, 0.4); }
+        
+        .delete-btn { display: inline-block; margin-top: 0.8rem; padding: 0.6rem 1.4rem; background: #dc2626; color: white; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .delete-btn:hover { background: #b91c1c; box-shadow: 0 0 12px rgba(220, 38, 38, 0.4); }
+        
+        .file-name { margin-top: 0.5rem; font-size: 0.85rem; color: #2563eb; font-weight: 600; }
+        .backup-note { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 1rem; margin-top: 1.2rem; border-radius: 0 8px 8px 0; font-size: 0.9rem; }
+        
+        footer { text-align: center; padding: 2rem; background: #0f172a; color: #94a3b8; margin-top: 3rem; font-size: 0.9rem; border-top: 1px solid #1e293b; }
+        
+        .security-banner { background: #fff5f5; border-left: 4px solid #ef4444; padding: 1.5rem; margin: 2rem auto; max-width: 1100px; border-radius: 0 12px 12px 0; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.05); }
+        .security-banner h3 { color: #991b1b; font-size: 1.15rem; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem; }
+        .security-banner ul { color: #7f1d1d; font-size: 0.9rem; padding-left: 1.2rem; line-height: 1.6; }
+        
+        .hash-tag { font-family: monospace; font-size: 0.75rem; color: #475569; background: #e2e8f0; padding: 3px 8px; border-radius: 6px; word-break: break-all; }
+        .button-group { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin-top: 0.8rem; }
+
+        .contact-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; }
+        .fb-btn { background: #1877f2; color: white; padding: 0.8rem 1.8rem; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.6rem; margin-top: 1rem; border: none; cursor: pointer; font-size: 1rem; transition: all 0.3s; }
+        .fb-btn:hover { background: #166fe5; box-shadow: 0 0 15px rgba(24, 119, 242, 0.5); }
+
+        /* Modal Styles */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(5px); justify-content: center; align-items: center; z-index: 1000; padding: 1rem; }
+        .modal-content { background: white; padding: 2.5rem; border-radius: 16px; max-width: 450px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.3); text-align: center; animation: scaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .modal-content h3 { color: #1e3a8a; margin-bottom: 0.5rem; font-size: 1.4rem; }
+        .modal-content p { color: #475569; font-size: 0.95rem; margin-bottom: 1.5rem; }
+        .admin-options { display: flex; flex-direction: column; gap: 0.8rem; }
+        .admin-option-btn { background: #f8fafc; border: 2px solid #e2e8f0; padding: 0.9rem 1.2rem; border-radius: 10px; text-decoration: none; color: #1e293b; font-weight: 600; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; }
+        .admin-option-btn:hover { border-color: #2563eb; background: #eff6ff; color: #1e40af; transform: translateX(4px); }
+        .close-modal-btn { margin-top: 1.5rem; background: #e2e8f0; border: none; padding: 0.7rem 1.4rem; border-radius: 8px; font-weight: 600; cursor: pointer; color: #334155; transition: background 0.2s; }
+        .close-modal-btn:hover { background: #cbd5e1; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleUp { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+        @media (max-width: 768px) {
+            header { flex-direction: column; text-align: center; gap: 0.8rem; padding: 1.2rem 1rem; }
+            nav { justify-content: center; gap: 0.6rem; }
+            section { padding: 1.5rem 1rem; }
+            .hero { padding: 2.5rem 1rem; }
+            .hero h2 { font-size: 1.8rem; }
+            .search-box { flex-direction: column; }
+            .search-box button { width: 100%; }
+            .download-btn, .delete-btn { width: 100%; text-align: center; margin-right: 0; margin-top: 0.5rem; }
+            .backup-section .btn { display: block; width: 100%; margin-left: 0 !important; margin-bottom: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <h1>VeriDoc</h1>
+            <p>Next-Gen Digital Cloud Vault & Repository</p>
+        </div>
+        <nav>
+            <a href="#home">Home</a>
+            <a href="#upload">Backup File</a>
+            <a href="#search">Search File</a>
+            <a href="#documents">Repository</a>
+            <a href="#backup">Admin Export</a>
+            <a href="#about">About</a>
+            <a href="#contact">Support</a>
+        </nav>
+    </header>
+
+    <section id="home" class="hero">
+        <h2>Secure Cloud Vault for Your Important Files</h2>
+        <p>Never worry about losing your documents on your phone or computer. Safely backup your files here with military-grade digital hashing and retrieve them anytime.</p>
+        <div class="hero-buttons">
+            <a href="#upload" class="btn primary">📥 Backup / Upload File Now</a>
+            <a href="#search" class="btn secondary">🔍 Retrieve Saved File</a>
+        </div>
+    </section>
+
+    <div class="security-banner">
+        <h3>🛡 Anti-Scam & Official Service Protection Notice</h3>
+        <ul>
+            <li><strong>100% Free Platform:</strong> VeriDoc is a free public repository. Administrators will NEVER ask for payment to retrieve, backup, or delete files.</li>
+            <li><strong>Security Audit Logging:</strong> All upload activities, timestamps, IP addresses, and Digital SHA-256 Checksums are automatically recorded in our secure system logs.</li>
+            <li><strong>Zero Financial Liability & Fraud Warning:</strong> Any attempt at extortion, threats, or fraudulent claims will be reported directly to law enforcement authorities (PNP Anti-Cybercrime Group & NBI).</li>
+        </ul>
+    </div>
+
+    <section id="upload" class="upload-section">
+        <h2>📥 Upload & Save File to Cloud Vault</h2>
+        <p>Upload and store your files to ensure a safe online backup copy in case your original file is deleted (Max size: 10MB):</p>
+        <form id="uploadForm" novalidate>
+            <div class="form-group">
+                <label for="docTitle">Document Name / Title *:</label>
+                <input type="text" id="docTitle" placeholder="Example: Final Research Report, Project Documentation, Thesis Draft..." required>
+            </div>
+            <div class="form-group">
+                <label for="docAuthor">Owner / Author Name(s) *:</label>
+                <input type="text" id="docAuthor" placeholder="Your name or group members (e.g., Azucena, Caliso, Lumosag)" required>
+            </div>
+            <div class="form-group">
+                <label for="docYear">Year Created / Saved *:</label>
+                <input type="number" id="docYear" min="2000" max="2026" placeholder="e.g., 2026" required>
+            </div>
+            <div class="form-group">
+                <label for="docKeywords">Search Tags / Keywords *:</label>
+                <input type="text" id="docKeywords" placeholder="Keywords to help search for this file (e.g., capstone, chapter1, final, it-project)" required>
+            </div>
+            <div class="form-group">
+                <label for="docAbstract">File Description / Notes *:</label>
+                <textarea id="docAbstract" rows="3" placeholder="A brief description or summary of the uploaded document..." required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="docPin">Deletion PIN / Security Code *:</label>
+                <input type="password" id="docPin" placeholder="Create a 4-digit PIN or phone number (required only if you wish to DELETE the file later)" required>
+            </div>
+            <div class="form-group">
+                <label for="docFile">Select Document File (PDF, DOC, DOCX - Max 10MB) *:</label>
+                <input type="file" id="docFile" accept=".pdf,.doc,.docx" required>
+                <p id="selectedFileName" class="file-name"></p>
+            </div>
+            <button type="submit" id="submitBtn" class="btn primary">💾 Save & Backup File to Cloud</button>
+        </form>
+        <p id="uploadMessage" class="message" style="display: none;"></p>
+    </section>
+    
+    <section id="search" class="search-section">
+        <h2>🔍 Search & Retrieve Saved File</h2>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Type Title, Author, or Keywords...">
+            <button id="searchBtn">Search</button>
+        </div>
+        <div id="results"></div>
+    </section>
+
+    <section id="documents" class="all-docs">
+        <h2>📂 All Stored Documents</h2>
+        <div id="docList"></div>
+    </section>
+    
+    <section id="backup" class="backup-section">
+        <h2>⚙️ Admin & System Export Tools</h2>
+        <p>Download the complete JSON Registry Audit Logs for permanent offline backup or for verifying scammer claims:</p>
+        <div class="button-group">
+            <button id="exportBtn" class="btn backup">📥 Export Database Backup (JSON)</button>
+            <button id="verifyBtn" class="btn secondary" onclick="verifyScammerClaim()">🔍 Verify File / Fraud Claim</button>
+        </div>
+        <div class="backup-note">
+            <strong>Note:</strong> The exported JSON file contains official audit logs and digital hashes that serve as proof against fraudulent extortion claims.
+        </div>
+    </section>
+
+    <section id="about" class="about">
+        <h2>ℹ️ About VeriDoc</h2>
+        <p>VeriDoc is a secure and free cloud archive designed for storing and retrieving essential digital documents.</p>
+        <ul>
+            <li>🔒 All files are backed up securely in Supabase Cloud Storage.</li>
+            <li>🛡 Protected with SHA-256 Checksums & IP Footprint Tracking.</li>
+            <li>❌ Strict No-Payment Policy: Always 100% Free.</li>
+        </ul>
+    </section>
+
+    <section id="contact" class="contact-section">
+        <h2>💬 Contact & Technical Support</h2>
+        <p>Having issues uploading, retrieving files, or encountering system errors? Reach out directly to the System Administrators for assistance:</p>
+        <div class="contact-box">
+            <p><strong>System Administrators:</strong> Azareel Oliveros Azucena • Joceline Caliso • Aljanna Lumosag</p>
+            <p style="margin-top:0.4rem; color:#475569; font-size:0.9rem;">Click the button below to choose an administrator to message on Facebook for inquiries or urgent support:</p>
+            <button onclick="openAdminModal()" class="fb-btn">
+                🌐 Contact Administrator on Facebook
+            </button>
+        </div>
+    </section>
+
+    <!-- Admin Selection Modal Popup -->
+    <div id="adminModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Select Administrator</h3>
+            <p>Piliin kung sinong administrator ang nais mong kontakin:</p>
+            <div class="admin-options">
+                <a href="https://www.facebook.com/azareel.oliveros.azucena" target="_blank" rel="noopener noreferrer" class="admin-option-btn">
+                    <span>👤 Azareel Oliveros Azucena</span>
+                    <span>➔</span>
+                </a>
+                <a href="https://www.facebook.com/jocelyn.rebucas.caliso.2024" target="_blank" rel="noopener noreferrer" class="admin-option-btn">
+                    <span>👤 Joceline Caliso</span>
+                    <span>➔</span>
+                </a>
+                <a href="https://www.facebook.com/aljanna.lumosag.2025" target="_blank" rel="noopener noreferrer" class="admin-option-btn">
+                    <span>👤 Aljanna Lumosag</span>
+                    <span>➔</span>
+                </a>
+            </div>
+            <button onclick="closeAdminModal()" class="close-modal-btn">Cancel</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 VeriDoc Cloud Vault — Official Secure System</p>
+  </footer>
+      <script>
+        const CONFIG = {
+            SUPABASE_URL: 'https://uxtazswklbulipaoxjcw.supabase.co',
+            SUPABASE_ANON_KEY: 'sb_publishable_KooZVsrgAPDw9WOAmFjtYA_fDMGSaUi',
+            STORAGE_BUCKET: 'veridoc-files',
+            MAX_FILE_SIZE_MB: 10,
+            MIN_YEAR: 2000,
+            MAX_YEAR: 2026
+        };
+
+        const supabaseClient = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+        let documents = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAllDocs();
+        });
+
+        document.getElementById('searchBtn').addEventListener('click', searchDocuments);
+        document.getElementById('searchInput').addEventListener('keypress', e => {
+            if (e.key === 'Enter') searchDocuments();
+        });
+        
+        const uploadForm = document.getElementById('uploadForm');
+        uploadForm.addEventListener('submit', uploadDocument);
+        
+        document.getElementById('exportBtn').addEventListener('click', exportAllData);
+
+        document.getElementById('docFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                document.getElementById('selectedFileName').textContent = `Selected: ${file.name} (${fileSizeMB} MB)`;
+            } else {
+                document.getElementById('selectedFileName').textContent = '';
+            }
+        });
+
+        function openAdminModal() {
+            document.getElementById('adminModal').style.display = 'flex';
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').style.display = 'none';
+        }
+
+        window.addEventListener('click', function(e) {
+            const modal = document.getElementById('adminModal');
+            if (e.target === modal) {
+                closeAdminModal();
+            }
+        });
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function showMessage(msg, type) {
+            const msgEl = document.getElementById('uploadMessage');
+            msgEl.textContent = msg;
+            msgEl.className = `message ${type}`;
+            msgEl.style.display = 'block';
+        }
+
+        function clearMessage() {
+            const msgEl = document.getElementById('uploadMessage');
+            msgEl.textContent = '';
+            msgEl.style.display = 'none';
+        }
+
+        async function getUserIP() {
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                return data.ip || 'Unknown';
+            } catch (e) {
+                return 'Unavailable';
+            }
+        }
+
+        async function getFileHash(file) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            } catch (e) {
+                return 'Hash-Failed';
+            }
+        }
+
+        async function triggerFileDownload(fileUrl, fileName, btnElement) {
+            const originalText = btnElement.textContent;
+            try {
+                btnElement.textContent = '⏳ Downloading...';
+                btnElement.style.pointerEvents = 'none';
+
+                const response = await fetch(fileUrl);
+                if (!response.ok) throw new Error('Download request failed');
+                
+                const blob = await response.blob();
+                const blobUrl = window.URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = fileName || 'downloaded-document';
+                document.body.appendChild(link);
+                link.click();
+                
+                window.URL.revokeObjectURL(blobUrl);
+                document.body.removeChild(link);
+            } catch (err) {
+                console.warn('Direct blob download failed, opening directly:', err);
+                window.open(fileUrl, '_blank');
+            } finally {
+                btnElement.textContent = originalText;
+                btnElement.style.pointerEvents = 'auto';
+            }
+        }
+
+        async function uploadDocument(e) {
+            e.preventDefault();
+            clearMessage();
+
+            const title = document.getElementById('docTitle').value.trim();
+            const author = document.getElementById('docAuthor').value.trim();
+            const yearVal = document.getElementById('docYear').value.trim();
+            const keywords = document.getElementById('docKeywords').value.trim();
+            const abstract = document.getElementById('docAbstract').value.trim();
+            const pin = document.getElementById('docPin').value.trim();
+            const fileInput = document.getElementById('docFile');
+            const file = fileInput.files[0];
+
+            if (!title || !author || !yearVal || !keywords || !abstract || !pin) {
+                showMessage('⚠ Please fill out all required fields. Empty inputs are not allowed.', 'error');
+                return;
+            }
+
+            const yearNum = parseInt(yearVal, 10);
+            if (isNaN(yearNum) || yearNum < CONFIG.MIN_YEAR || yearNum > CONFIG.MAX_YEAR) {
+                showMessage(`⚠ Please enter a valid publication year between ${CONFIG.MIN_YEAR} and ${CONFIG.MAX_YEAR}.`, 'error');
+                return;
+            }
+
+            if (!file) {
+                showMessage('⚠️ Please select a file to upload.', 'error');
+                return;
+            }
+
+            const allowedExtensions = ['pdf', 'doc', 'docx'];
+            const fileExt = file.name.split('.').pop().toLowerCase();
+            if (!allowedExtensions.includes(fileExt)) {
+                showMessage('⚠ Invalid file type. Please upload a PDF, DOC, or DOCX document.', 'error');
+                return;
+            }
+
+            const maxSizeBytes = CONFIG.MAX_FILE_SIZE_MB * 1024 * 1024;
+            if (file.size > maxSizeBytes) {
+                showMessage(`⚠ File size exceeds ${CONFIG.MAX_FILE_SIZE_MB}MB limit. Please compress your file before uploading.`, 'error');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Generating Security Checksum...';
+                showMessage('⏳ Computing SHA-256 digital footprint and uploading to Cloud...', 'success');
+
+                const uploaderIP = await getUserIP();
+                const fileHash = await getFileHash(file);
+
+                const uniqueFileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+                const filePath = `documents/${uniqueFileName}`;
+
+                const { data: storageData, error: storageError } = await supabaseClient.storage
+                    .from(CONFIG.STORAGE_BUCKET)
+                    .upload(filePath, file);
+
+                if (storageError) throw storageError;
+
+                const { data: publicUrlData } = supabaseClient.storage
+                    .from(CONFIG.STORAGE_BUCKET)
+                    .getPublicUrl(filePath);
+
+                const filePublicUrl = publicUrlData.publicUrl;
+
+                const newDoc = {
+                    title: title,
+                    author: author,
+                    year: yearNum,
+                    keywords: keywords,
+                    abstract: abstract,
+                    delete_pin: pin,
+                    file_name: file.name,
+                    file_path: filePath,
+                    file_url: filePublicUrl,
+                    uploader_ip: uploaderIP,
+                    file_hash: fileHash,
+                    date_added: new Date().toISOString()
+                };
+
+                const { data: dbData, error: dbError } = await supabaseClient
+                    .from('documents')
+                    .insert([newDoc]);
+
+                if (dbError) throw dbError;
+
+                showMessage('✅ Successfully backed up to Cloud Vault with Digital Checksum!', 'success');
+                uploadForm.reset();
+                document.getElementById('selectedFileName').textContent = '';
+                loadAllDocs();
+
+            } catch (err) {
+                console.error('Upload Error Details:', err);
+                showMessage('❌ Upload failed: Please check your internet connection or try again later.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '💾 Save & Backup File to Cloud';
+            }
+        }
+
+        async function loadAllDocs() {
+            const listDiv = document.getElementById('docList');
+            try {
+                const { data, error } = await supabaseClient
+                    .from('documents')
+                    .select('id, title, author, year, keywords, abstract, file_name, file_path, file_url, uploader_ip, file_hash, created_at, date_added')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                documents = data || [];
+                displayAllDocs();
+            } catch (err) {
+                console.error('Fetch Error:', err);
+                listDiv.innerHTML = '<p class="hint" style="color:#dc2626;">⚠️ Could not load records from server. Please check internet connection.</p>';
+            }
+        }
+
+        function displayAllDocs() {
+            const listDiv = document.getElementById('docList');
+            if (documents.length === 0) {
+                listDiv.innerHTML = '<p class="hint">No documents have been added yet. Be the first to upload!</p>';
+                return;
+            }
+            listDiv.innerHTML = '';
+            documents.forEach(doc => listDiv.innerHTML += createDocCard(doc, false));
+        }
+
+        function searchDocuments() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const resultsDiv = document.getElementById('results');
+            if (!query) {
+                resultsDiv.innerHTML = '<p class="hint">Type a keyword above to begin your search...</p>';
+                return;
+            }
+            const results = documents.filter(doc => {
+                const allText = `${doc.title} ${doc.author} ${doc.keywords} ${doc.abstract} ${doc.file_hash || ''}`.toLowerCase();
+                return allText.includes(query);
+            });
+            if (results.length === 0) {
+                resultsDiv.innerHTML = `<p class="hint">No documents found matching "<strong>${escapeHTML(query)}</strong>". Try a different keyword.</p>`;
+                return;
+            }
+            resultsDiv.innerHTML = `<h3 style="margin-bottom:0.8rem; font-size:1.1rem; color:#1e3a8a;">Found ${results.length} matching document(s):</h3>`;
+            results.forEach(doc => resultsDiv.innerHTML += createDocCard(doc, true));
+        }
+
+        async function deleteDocument(docId, filePath) {
+            const userInputPin = prompt("🔑 Security Verification:\nPlease enter your Deletion PIN or Master Key to delete this document:");
+
+            if (userInputPin === null) return; 
+
+            const cleanInput = userInputPin.trim();
+
+            if (!cleanInput) {
+                alert("⚠️ Please enter a valid PIN.");
+                return;
+            }
+
+            if (!confirm('⚠ Are you sure you want to permanently delete this document from the cloud archive?')) return;
+
+            try {
+                const { data: isDeleted, error } = await supabaseClient
+                    .rpc('delete_document_with_pin', {
+                        doc_id: isNaN(docId) ? docId : parseInt(docId, 10),
+                        user_pin: cleanInput
+                    });
+
+                if (error) throw error;
+
+                if (!isDeleted) {
+                    alert("❌ Incorrect Security PIN! Access denied.");
+                    return;
+                }
+
+                if (filePath) {
+                    await supabaseClient.storage.from(CONFIG.STORAGE_BUCKET).remove([filePath]);
+                }
+
+                alert("✅ Document deleted successfully!");
+                loadAllDocs();
+                const searchInput = document.getElementById('searchInput').value.trim();
+                if (searchInput) searchDocuments();
+            } catch (err) {
+                console.error('Delete error:', err);
+                alert('❌ Unable to delete document right now. Please try again.');
+            }
+        }
+
+        async function exportAllData() {
+            const adminPin = prompt("🔑 Admin Security PIN required to export audit logs:");
+            if (adminPin === null) return;
+
+            const cleanPin = adminPin.trim();
+
+            if (!cleanPin) {
+                alert("⚠️ Please enter a valid PIN.");
+                return;
+            }
+
+            try {
+                const { data: isValid, error } = await supabaseClient
+                    .rpc('verify_admin_export_pin', {
+                        admin_pin: cleanPin
+                    });
+
+                if (error) throw error;
+
+                if (!isValid) {
+                    alert("❌ Incorrect Admin PIN! Access denied.");
+                    return;
+                }
+
+                if (documents.length === 0) {
+                    alert('No documents available to export.');
+                    return;
+                }
+
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(documents, null, 2));
+                const downloadAnchor = document.createElement('a');
+                downloadAnchor.setAttribute("href", dataStr);
+                downloadAnchor.setAttribute("download", `veridoc_audit_log_${new Date().toISOString().slice(0, 10)}.json`);
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                downloadAnchor.remove();
+
+            } catch (err) {
+                console.error('Export Verification Error:', err);
+                alert('❌ Security validation failed. Please try again.');
+            }
+        }
+
+        function verifyScammerClaim() {
+            const query = prompt("🔍 Enter File Name, Title, or Author claimed by the user:");
+            if (!query) return;
+
+            const matches = documents.filter(doc => 
+                doc.title.toLowerCase().includes(query.toLowerCase()) ||
+                doc.author.toLowerCase().includes(query.toLowerCase()) ||
+                (doc.file_name && doc.file_name.toLowerCase().includes(query.toLowerCase()))
+            );
+
+            if (matches.length > 0) {
+                alert(`✅ RECORD FOUND! (${matches.length} matches found)\n\nTitle: ${matches[0].title}\nAuthor: ${matches[0].author}\nIP Footprint: ${matches[0].uploader_ip || 'N/A'}\nHash: ${matches[0].file_hash || 'N/A'}`);
+            } else {
+                alert(`🛑 NO RECORD FOUND!\n\nNo matching record found for "${query}" in the database. This proves that no such file was uploaded to the VeriDoc system.`);
+            }
+        }
+
+        function createDocCard(doc, isResult) {
+            const safeTitle = escapeHTML(doc.title);
+            const safeAuthor = escapeHTML(doc.author);
+            const safeYear = escapeHTML(doc.year);
+            const safeKeywords = escapeHTML(doc.keywords);
+            const safeAbstract = escapeHTML(doc.abstract);
+            const safeFileName = escapeHTML(doc.file_name);
+            const safeHash = escapeHTML(doc.file_hash || 'N/A');
+            const formattedDate = new Date(doc.created_at || doc.date_added).toLocaleString('en-US', {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+            });
+
+            return `
+                <div class="${isResult ? 'result-item' : 'doc-card'}">
+                    <h4 style="font-size: 1.15rem; color: #1e3a8a; margin-bottom: 0.4rem;">${safeTitle}</h4>
+                    <p><strong>Author(s):</strong> ${safeAuthor}</p>
+                    <p><strong>Year:</strong> ${safeYear}</p>
+                    <p><strong>Keywords:</strong> <em>${safeKeywords}</em></p>
+                    <p style="margin-top: 0.5rem; color: #475569;">${safeAbstract}</p>
+                    <p style="margin-top: 0.5rem; font-size: 0.85rem; color: #475569;">
+                        <strong>File:</strong> ${safeFileName || 'No file attached'}
+                    </p>
+                    <p style="margin-top: 0.3rem;">
+                        <span class="hash-tag">SHA-256: ${safeHash.substring(0, 24)}...</span>
+                    </p>
+                    <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.3rem;">Uploaded: ${formattedDate}</p>
+                    <div style="margin-top: 0.6rem;">
+                        ${doc.file_url ? 
+                            `<button onclick="triggerFileDownload('${doc.file_url}', '${safeFileName.replace(/'/g, "\\'")}', this)" class="download-btn">📄 Download File</button>` : 
+                            '<span style="color:#94a3b8; font-size:0.85rem;">No file available </span>'
+                        }
+                        <button onclick="deleteDocument('${doc.id}', '${doc.file_path || ''}')" class="delete-btn">🗑 Delete</button>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
